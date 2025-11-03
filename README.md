@@ -18,7 +18,7 @@ This component adds the following sensors to Home Assistant:
 To add the integration without custom sensors, with only the ecopower price and injection tariff sensors, the following entry should be added to the configuration.yaml file:
 ```
 sensor:
-  - platform: sdac_elia
+- platform: sdac_elia
 ```
 Note that the "sensor" entry can only be in the file once. If it is already in the configuration file, the platform entry line should be added alongside the other already existing entries.
 
