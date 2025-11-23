@@ -64,7 +64,10 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict[str, Any]:
         time_now = datetime.datetime.now()
         date_today = datetime.date.today()
-        if self.last_fetch_date != date_today:
+        if (
+            self.last_fetch_time is None
+            or (time_now - self.last_fetch_time).total_seconds() >= 3600
+        ):
             try:
                 self.SDAC_data = await self._fetch_data()
             except Exception as err:
@@ -97,11 +100,22 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
     async def _fetch_data(self) -> Any:
         time_now = datetime.datetime.now()
         date_today = time_now.date()
-        url = f"https://griddata.elia.be/eliabecontrols.prod/interface/Interconnections/daily/auctionresultsqh/{date_today}"
+        date_tomorrow = date_today + datetime.timedelta(days=1)
+
+        urls = [
+            f"https://griddata.elia.be/eliabecontrols.prod/interface/Interconnections/daily/auctionresultsqh/{date_today}",
+            f"https://griddata.elia.be/eliabecontrols.prod/interface/Interconnections/daily/auctionresultsqh/{date_tomorrow}"
+        ]
+
+        merged_payload = []
+
         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                payload = await resp.json()
-                return payload
+            for url in urls:
+                async with session.get(url) as resp:
+                    data = await resp.json()
+                    merged_payload.extend(data)
+
+        return merged_payload
     
     def get_current_price(self) -> float | None:
         utc_time = datetime.datetime.now(datetime.timezone.utc)                                     # Get current UTC time
