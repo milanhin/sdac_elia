@@ -43,6 +43,7 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
 
         self.last_fetch_time: datetime.datetime | None = None           # Time of last data fetch from Elia
         self.last_fetch_date: datetime.date | None = None               # Date of last data fetch from Elia
+        self.fetched_forecast: bool = False                             # Bool if prices of tomorrow are fetched
         self.SDAC_data: Any = None                                      # JSON object with SDAC price data from Elia
         self.prices: list[dict] = []                                    # Filtered data with time and price pairs
         self.sdac_price: float | None = None                            # Current SDAC price
@@ -64,9 +65,13 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict[str, Any]:
         time_now = datetime.datetime.now()
         date_today = datetime.date.today()
+        date_tomorrow = date_today + datetime.timedelta(days=1)
+
+        # Fetch prices of today
         if self.last_fetch_date != date_today:
+            self.fetched_forecast = False
             try:
-                self.SDAC_data = await self._fetch_data()
+                self.SDAC_data = await self._fetch_data(date_today)
             except Exception as err:
                 _LOGGER.error("Error fetching data from Elia: %s", err)
                 return self.data
@@ -75,6 +80,22 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
             self.prices = [{"time": i["dateTime"], "price": i["price"]} for i in self.SDAC_data]  # filter data to store time and price
             self.last_fetch_time = time_now
             self.last_fetch_date = date_today
+        
+        # Fetch prices of tomorrow
+        if not self.fetched_forecast and time_now.hour >= 15:
+            try:
+                forecast_data = await self._fetch_data(date_tomorrow)
+            except Exception as err:
+                _LOGGER.error("Error fetching data from Elia: %s", err)
+                return self.data
+            
+            if len(forecast_data):
+                _LOGGER.info("SDAC prices of tomorrow fetched from Elia")
+                forecast_prices = [{"time": i["dateTime"], "price": i["price"]} for i in forecast_data]
+                self.prices.extend(forecast_prices)
+                self.fetched_forecast = True
+            else:
+                _LOGGER.warning("Fetching prices of tomorrow from Elia resulted in empty payload")
         
         self.sdac_price = self.get_current_price()
 
@@ -94,10 +115,9 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
         }
         return data
     
-    async def _fetch_data(self) -> Any:
+    async def _fetch_data(self, date) -> Any:
         time_now = datetime.datetime.now()
-        date_today = time_now.date()
-        url = f"https://griddata.elia.be/eliabecontrols.prod/interface/Interconnections/daily/auctionresultsqh/{date_today}"
+        url = f"https://griddata.elia.be/eliabecontrols.prod/interface/Interconnections/daily/auctionresultsqh/{date}"
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
                 payload = await resp.json()
