@@ -1,5 +1,5 @@
 # SDAC Elia
-Custom component for Home Assistant to fetch Belgian SDAC prices. The prices are stored in sensors that can be used for automation purposes.
+Custom component for Home Assistant HACS to fetch Belgian SDAC prices. The prices are stored in sensors that can be used for automation purposes.
 This component is built for quarterly hour prices.
 No API key is needed to fetch the data.
 
@@ -13,6 +13,11 @@ This component adds the following sensors to Home Assistant:
 - Ecopower injection tariff: injection tariff formula of Ecopower applied to sdac price
 - Custom electricity price (Optional): custom formula applied to sdac price (meant for other suppliers than ecopower), needs to be configured
 - Custom injection tariff (Optional): custom formula for injection tariff applied to sdac price (meant for other suppliers than ecopower), needs to be configured
+
+## Installation
+Installing the custom component can be done with [HACS](https://hacs.xyz) by searching for "SDAC Elia".
+OR
+It can be installed manually by downloading the [latest release](https://github.com/milanhin/sdac_elia/releases) and copying the `sdac_elia` folder into to your Home Assistant `config/custom_components` folder.
 
 ## Configuration
 To add the integration without custom sensors, with only the ecopower price and injection tariff sensors, the following entry should be added to the configuration.yaml file:
