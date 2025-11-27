@@ -44,7 +44,6 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
         self.last_fetch_time: datetime.datetime | None = None           # Time of last data fetch from Elia
         self.last_fetch_date: datetime.date | None = None               # Date of last data fetch from Elia
         self.fetched_forecast: bool = False                             # Bool if prices of tomorrow are fetched
-        self.SDAC_data: Any = None                                      # JSON object with SDAC price data from Elia
         self.prices: list[dict] = []                                    # Filtered data with time and price pairs
         self.sdac_price: float | None = None                            # Current SDAC price
         self.ecopower_price: float | None = None                        # Current electricity price for Ecopower clients
@@ -71,34 +70,32 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
         if self.last_fetch_date != date_today:
             self.fetched_forecast = False
             try:
-                self.SDAC_data = await self._fetch_data(date_today)
+                SDAC_data = await self._fetch_data(date_today)
             except Exception as err:
                 _LOGGER.error("Error fetching data from Elia: %s", err)
                 return self.data
             
-            _LOGGER.info("SDAC prices fetched from Elia")
-            self.prices = [{"time": i["dateTime"], "price": i["price"]} for i in self.SDAC_data]  # filter data to store time and price
-            self.last_fetch_time = time_now
-            self.last_fetch_date = date_today
+            if len(SDAC_data):  # if page can't be reached, an empty list will be returned
+                _LOGGER.info("SDAC prices of today fetched from Elia")
+                self.prices = [{"time": i["dateTime"], "price": i["price"]} for i in SDAC_data]  # filter data to store time and price
+                self.last_fetch_time = time_now
+                self.last_fetch_date = date_today
         
         # Fetch prices of tomorrow
-        if not self.fetched_forecast and time_now.hour >= 15:
+        if not self.fetched_forecast and time_now.hour >= 13:
             try:
                 forecast_data = await self._fetch_data(date_tomorrow)
             except Exception as err:
                 _LOGGER.error("Error fetching data from Elia: %s", err)
                 return self.data
             
-            if len(forecast_data):
+            if len(forecast_data):  # if page can't be reached, an empty list will be returned
                 _LOGGER.info("SDAC prices of tomorrow fetched from Elia")
-                forecast_prices = [{"time": i["dateTime"], "price": i["price"]} for i in forecast_data]
+                forecast_prices = [{"time": i["dateTime"], "price": i["price"]} for i in forecast_data]  # filter data to store time and price
                 self.prices.extend(forecast_prices)
                 self.fetched_forecast = True
-            else:
-                _LOGGER.warning("Fetching prices of tomorrow from Elia resulted in empty payload")
         
-        self.sdac_price = self.get_current_price()
-
+        self.sdac_price = self.get_current_price()  # Find current price
         if self.sdac_price != None:
             self.ecopower_price = self.calculate_ecopower_price(sdac=self.sdac_price)
             self.ecopower_inj_tariff = self.calculate_ecopower_inj_tariff(sdac=self.sdac_price)
