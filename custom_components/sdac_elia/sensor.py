@@ -26,6 +26,9 @@ from .const import(
     CONF_INJ_TARIFF_FACTOR,
     CONF_CUSTOM_INJ_TARIFF,
     CONF_CUSTOM_PRICE,
+    PRICES,
+    CURRENT_PRICE,
+    LAST_FETCH_TIME,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -114,14 +117,14 @@ class EliaSensor(CoordinatorEntity, SensorEntity): # pyright: ignore[reportIncom
     @property
     def native_value(self) -> float | None: # pyright: ignore[reportIncompatibleVariableOverride]
         """Return the current SDAC price so it gets stored in the sensor as value"""
-        return self.coordinator.sdac_price
+        return self.coordinator.data[CURRENT_PRICE]
     
     @property
     def extra_state_attributes(self) -> dict[str, Any]: # pyright: ignore[reportIncompatibleVariableOverride]
         """Store all SDAC prices of the day."""
         return {
-            "Last update:": self.coordinator.last_fetch_time,
-            "prices": self.coordinator.prices,
+            "Last update:": self.coordinator.data[LAST_FETCH_TIME],
+            "prices": self.coordinator.data[PRICES],
             }
 
 

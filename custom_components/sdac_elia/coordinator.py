@@ -18,6 +18,9 @@ from .const import (
     CONF_FIXED_PRICE,
     CONF_FIXED_INJ_PRICE,
     CONF_INJ_TARIFF_FACTOR,
+    PRICES,
+    CURRENT_PRICE,
+    LAST_FETCH_TIME,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,13 +44,15 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
         self.custom_price_configured = custom_price_configured
         self.custom_inj_configured = custom_inj_configured
 
-        self.last_fetch_time: datetime.datetime | None = None           # Time of last data fetch from Elia
-        self.last_fetch_date: datetime.date | None = None               # Date of last data fetch from Elia
-        self.fetched_forecast: bool = False                             # Bool if prices of tomorrow are fetched
-        self.prices: list[dict] = []                                    # Filtered data with time and price pairs
+        self.last_fetch_today: datetime.datetime | None = None          # Time of last data fetch for today
+        self.last_fetch_date: datetime.date | None = None               # Date of last data fetch for today
+        self.last_fetch_tmrw: datetime.datetime | None = None           # Time of last data fetch for tomorrow
+        self.last_fetch_time: datetime.datetime | None = None           # Last time of fetching
+        self.fetched_tomorrow: bool = False                             # Bool for fetched prices of tomorrow
+        self.prices: list[dict] = []                                    # Filtered data with time and price pairs of today and tomorrow
         self.sdac_price: float | None = None                            # Current SDAC price
         self.ecopower_price: float | None = None                        # Current electricity price for Ecopower clients
-        self.ecopower_inj_tariff: float | None = None                   # Current injection tariff for ecopower clients
+        self.ecopower_inj_tariff: float | None = None                   # Current injection tariff for Ecopower clients
         self.custom_price: float | None = None                          # Price based on config formula
         self.custom_inj_tariff: float | None = None                     # Injection tariff based on config formula
         
@@ -68,33 +73,36 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
 
         # Fetch prices of today
         if self.last_fetch_date != date_today:
-            self.fetched_forecast = False
+            self.fetched_tomorrow = False
             try:
-                SDAC_data = await self._fetch_data(date_today)
+                sdac_today = await self._fetch_data(date_today)
             except Exception as err:
                 _LOGGER.error("Error fetching data from Elia: %s", err)
                 return self.data
             
-            if len(SDAC_data):  # if page can't be reached, an empty list will be returned
+            if len(sdac_today):  # If prices haven't been publsihed yet, an empty list will be returned
                 _LOGGER.info("SDAC prices of today fetched from Elia")
-                self.prices = [{"time": i["dateTime"], "price": i["price"]} for i in SDAC_data]  # filter data to store time and price
-                self.last_fetch_time = time_now
+                self.prices = [{"time": i["dateTime"], "price": i["price"]} for i in sdac_today]  # filter data to store time and price
+                self.last_fetch_today = time_now
                 self.last_fetch_date = date_today
-        
+
         # Fetch prices of tomorrow
-        if not self.fetched_forecast and time_now.hour >= 13:
-            try:
-                forecast_data = await self._fetch_data(date_tomorrow)
-            except Exception as err:
-                _LOGGER.error("Error fetching data from Elia: %s", err)
-                return self.data
-            
-            if len(forecast_data):  # if page can't be reached, an empty list will be returned
-                _LOGGER.info("SDAC prices of tomorrow fetched from Elia")
-                forecast_prices = [{"time": i["dateTime"], "price": i["price"]} for i in forecast_data]  # filter data to store time and price
-                self.prices.extend(forecast_prices)
-                self.fetched_forecast = True
+        if not self.fetched_tomorrow and time_now.hour >= 13:
+            if self.last_fetch_tmrw == None or self.last_fetch_tmrw - time_now > datetime.timedelta(minutes=10):
+                try:
+                    sdac_tomorrow = await self._fetch_data(date_tomorrow)
+                    self.last_fetch_tmrw = time_now
+                except Exception as err:
+                    _LOGGER.error("Error fetching data from Elia: %s", err)
+                    return self.data
+                
+                if len(sdac_tomorrow):  # If prices haven't been published yet, an empty list will be returned
+                    _LOGGER.info("SDAC prices of tomorrow fetched from Elia")
+                    prices_tomorrow = [{"time": i["dateTime"], "price": i["price"]} for i in sdac_tomorrow]  # filter data to store time and price
+                    self.prices.extend(prices_tomorrow)
+                    self.fetched_tomorrow = True
         
+        # Grab and calculate prices for sensors
         self.sdac_price = self.get_current_price()  # Find current price
         if self.sdac_price != None:
             self.ecopower_price = self.calculate_ecopower_price(sdac=self.sdac_price)
@@ -105,10 +113,11 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
             if self.custom_inj_configured:
                 self.custom_inj_tariff = self.calculate_custom_inj_tariff(sdac=self.sdac_price)
 
+        self.last_fetch_time = self.last_fetch_tmrw if self.fetched_tomorrow else self.last_fetch_today
         data = {
-            "prices": self.prices,
-            "current_price": self.sdac_price,
-            "last_fetch_time": self.last_fetch_time
+            PRICES: self.prices,
+            CURRENT_PRICE: self.sdac_price,
+            LAST_FETCH_TIME: self.last_fetch_time
         }
         return data
     
