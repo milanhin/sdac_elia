@@ -8,7 +8,7 @@ All prices are expressed in €/MWh. No VAT or distribution network costs are ad
 
 ## Sensors
 This component adds the following sensors to Home Assistant:
-- Elia SDAC current price: shows the current sdac price and stores the forecast in its atributes
+- Elia SDAC current price: shows the current sdac price and stores the sdac prices of today and tomorrow in its atributes
 - Ecopower electricity price: price formula of Ecopower applied to sdac price
 - Ecopower injection tariff: injection tariff formula of Ecopower applied to sdac price
 - Custom electricity price (Optional): custom formula applied to sdac price (meant for other suppliers than ecopower), needs to be configured
@@ -20,14 +20,9 @@ OR
 It can be installed manually by downloading the [latest release](https://github.com/milanhin/sdac_elia/releases) and copying the `sdac_elia` folder into to your Home Assistant `config/custom_components` folder.
 
 ## Configuration
-To add the integration without custom sensors, with only the ecopower price and injection tariff sensors, the following entry should be added to the configuration.yaml file:
-```
-sensor:
-  - platform: sdac_elia
-```
-Note that the "sensor" entry can only be in the file once. If it is already in the configuration file, the platform entry line should be added alongside the other already existing entries.
-
-To get the optional custom sensors, two parameters are required per sensor. These two typically make up a price formula.
+Configuration is done through the UI by going to settings -> integrations -> add the SDAC Elia integration.
+To add the custom sensors, tick the boxes of the sensor you'd like to configure.
+For each custom sensor, two parameters are required. These two typically make up a price formula.
 The config parameters for each sensor are called:
 - custom_price
   - price_factor
@@ -36,23 +31,14 @@ The config parameters for each sensor are called:
   - injection_tariff_factor
   - fixed_injection_price
 
+of which the factor is the multiplicator for the sdac (EPEX) price and the fixed price is the commission added to the formula. An example:
+
 In the case of Ecopower's formulae:
 - elektrcity price: 0.00102 * EPEX_DA + 0.004 [€/kWh]
 - injection tariff: 0.00098 * EPEX_DA - 0.015 [€/kWh]
   
 Note: the formula is expressed in €/kWh and should be configured this way as well.
-In the configuration.yaml file of Home Assistant, this would be configured as:
 
-```
-sensor:
-  - platform: sdac_elia
-    custom_price:
-      price_factor: 0.00102
-      fixed_price: 0.004
-    custom_injection_tariff:
-      injection_tariff_factor: 0.00098
-      fixed_injection_price: 0.015
-```
 ## Graph with pricing forecast
 A graph can be shown with the [ApexChart Graph Card](https://github.com/RomRider/apexcharts-card). 
 The lovelace code (based on [hass-entso-e](https://github.com/JaccoR/hass-entso-e)) for this graph is:
