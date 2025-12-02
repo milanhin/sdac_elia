@@ -8,6 +8,8 @@ CONF_CUSTOM_PRICE = "custom_price"
 CONF_CUSTOM_INJ_TARIFF = "custom_injection_tariff"
 CONF_USER_STEP = "user_step"
 
+CONFIG = "config"
+
 PRICES = "prices"
 CURRENT_PRICE = "current_price"
 LAST_FETCH_TIME = "last_fetch_time"

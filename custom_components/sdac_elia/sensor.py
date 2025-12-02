@@ -12,6 +12,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
     PLATFORM_SCHEMA
 )
+from homeassistant import config_entries
 from homeassistant.const import CURRENCY_EURO
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -29,51 +30,34 @@ from .const import(
     PRICES,
     CURRENT_PRICE,
     LAST_FETCH_TIME,
+    DOMAIN,
+    CONFIG,
+    CONF_USER_STEP,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-PRICE_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_PRICE_FACTOR): vol.Coerce(float),
-        vol.Required(CONF_FIXED_PRICE): vol.Coerce(float),
-    }
-)
+async def async_setup_entry(
+        hass: HomeAssistant,
+        config_entry: config_entries.ConfigEntry,
+        async_add_entities,
+):
+    """Set up sensor from config entry"""
+    config = hass.data[DOMAIN][CONFIG]
 
-INJ_TARIFF_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_INJ_TARIFF_FACTOR): vol.Coerce(float),
-        vol.Required(CONF_FIXED_INJ_PRICE): vol.Coerce(float),
-    }
-)
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Optional(CONF_CUSTOM_PRICE): PRICE_SCHEMA,
-        vol.Optional(CONF_CUSTOM_INJ_TARIFF): INJ_TARIFF_SCHEMA,
-    }
-)
-
-async def async_setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    async_add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None
-) -> None:
-    """Set up the sensor platform."""
     # Check if custom formulae are configured
     custom_price_configured: bool = False
     custom_inj_configured: bool = False
     custom_params: dict[str, float] = {}
 
     # Check if custom price is configured and put coefficients in dict
-    if CONF_CUSTOM_PRICE in config:
+    if config[CONF_USER_STEP][CONF_CUSTOM_PRICE]:
         custom_price_configured = True
         custom_params[CONF_PRICE_FACTOR] = config[CONF_CUSTOM_PRICE][CONF_PRICE_FACTOR]
         custom_params[CONF_FIXED_PRICE] = config[CONF_CUSTOM_PRICE][CONF_FIXED_PRICE]
 
     # Check if custom injection tariff is configured and put coefficients in dict
-    if CONF_CUSTOM_INJ_TARIFF in config:
+    if config[CONF_USER_STEP][CONF_CUSTOM_INJ_TARIFF]:
         custom_inj_configured = True
         custom_params[CONF_INJ_TARIFF_FACTOR] = config[CONF_CUSTOM_INJ_TARIFF][CONF_INJ_TARIFF_FACTOR]
         custom_params[CONF_FIXED_INJ_PRICE] = config[CONF_CUSTOM_INJ_TARIFF][CONF_FIXED_INJ_PRICE]
@@ -101,7 +85,6 @@ async def async_setup_platform(
 
     async_add_entities(entities_to_add)
     _LOGGER.info("SDAC_Elia platform was set up")
-
 
 class EliaSensor(CoordinatorEntity, SensorEntity): # pyright: ignore[reportIncompatibleVariableOverride]
     """Representation of a Sensor."""
