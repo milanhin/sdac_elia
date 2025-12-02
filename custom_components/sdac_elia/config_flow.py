@@ -43,7 +43,7 @@ class SdacEliaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     # The schema version of the entries that it creates
     # Home Assistant will call your migrate method if the version changes
     
-    async def async_step_user(self, user_input: dict[str, Any] | None = None):
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> config_entries.ConfigFlowResult:
         """Invoked when a user initiates a flow via the user interface."""
         errors = {}
         self.data = {}
