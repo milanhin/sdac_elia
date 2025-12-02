@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Wilt u aangepaste prijs- en injectietarief-formules configureren (anders dan die van Ecopower)?",
+                "title": "Aangepaste sensoren"
+            },
+            "custom_price": {
+                "description": "Vul de aangepaste prijsfactor en vaste kost in",
+                "title": "Aangepaste elektriciteitsprijs"
+            },
+            "custom_inj_tariff": {
+                "description": "Vul de aangepaste injectietarief-factor en vaste kost in",
+                "title": "Aangepast injectietarief"
+            }
+        }
+    }
+}

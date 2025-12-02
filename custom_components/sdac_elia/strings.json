@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Do you wish to configure custom price and injection tariff formulae (other than Ecopower's)?",
+                "title": "Custom sensors"
+            },
+            "custom_price": {
+                "description": "Fill in custom price factor and fixed cost",
+                "title": "Custom electricity price"
+            },
+            "custom_inj_tariff": {
+                "description": "Fill in custom injection tariff factor and fixed cost",
+                "title": "Custom injection tariff"
+            }
+        }
+    }
+}
