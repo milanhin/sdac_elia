@@ -73,6 +73,7 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
 
         # Fetch prices of today
         if self.last_fetch_date != date_today:
+            self.prices = []  # Empty price list on new day
             self.fetched_tomorrow = False
             try:
                 sdac_today = await self._fetch_data(date_today)
@@ -130,6 +131,9 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
                 return payload
     
     def get_current_price(self) -> float | None:
+        if not len(self.prices):
+            return None
+        
         utc_time = datetime.datetime.now(datetime.timezone.utc)                                     # Get current UTC time
         rounded_quarter = utc_time.minute // 15 * 15                                                # determine last quarter minutes
         rounded_utc_time = utc_time.replace(microsecond=0, second=0, minute=rounded_quarter)        # change current minutes to last quarter

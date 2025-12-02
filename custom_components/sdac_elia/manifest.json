@@ -2,7 +2,7 @@
   "domain": "sdac_elia",
   "name": "SDAC Elia",
   "codeowners": ["@milanhin"],
-  "config_flow": false,
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/milanhin/sdac_elia",
   "iot_class": "cloud_polling",
