@@ -72,10 +72,10 @@ async def async_setup_entry(
     )
 
     await sdac_coordinator.async_refresh()  # Call _async_update_data() on setup
-    entities_to_add = [
+    entities_to_add: list[CoordinatorEntity] = [
         EliaSensor(sdac_coordinator),
-        EcopowerPriceSensor(sdac_coordinator),
-        EcopowerInjectionSensor(sdac_coordinator),
+        #EcopowerPriceSensor(sdac_coordinator),
+        #EcopowerInjectionSensor(sdac_coordinator),
     ]
 
     if custom_price_configured:

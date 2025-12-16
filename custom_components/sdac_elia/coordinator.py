@@ -154,7 +154,7 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
         return rounded_inj_tariff
     
     def calculate_custom_price(self, sdac: float) -> float:
-        custom_price = (self.conf_price_factor * sdac + self.conf_fixed_price) * 1e3  # Price in eur/MWh
+        custom_price = (self.conf_price_factor * sdac + self.conf_fixed_price) * 1e3
         rounded_custom_price = round(custom_price, 2)
         return rounded_custom_price
     

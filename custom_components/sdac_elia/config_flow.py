@@ -51,7 +51,6 @@ class SdacEliaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 validated_schema = USER_SCHEMA(user_input)
                 
-                
             except Exception as e:
                 _LOGGER.error(e)
                 errors["base"] = "invalid_input"
