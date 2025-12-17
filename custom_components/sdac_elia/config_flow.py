@@ -3,6 +3,7 @@ import logging
 
 from typing import Any
 from homeassistant import config_entries
+from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 from .const import(
     DOMAIN,
@@ -13,6 +14,7 @@ from .const import(
     CONF_INJ_TARIFF_FACTOR,
     CONF_PRICE_FACTOR,
     CONF_USER_STEP,
+    CONFIG,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -100,3 +102,95 @@ class SdacEliaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(title=DOMAIN, data=self.data)
         
         return self.async_show_form(step_id="custom_inj_tariff", data_schema=INJ_TARIFF_SCHEMA, errors=errors)
+    
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry):
+        """Get the options flow for this handler."""
+        return OptionsFlowHandler()
+    
+
+class OptionsFlowHandler(config_entries.OptionsFlowWithReload):
+    """Handles options flow for the component"""
+    
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> config_entries.ConfigFlowResult:
+        """Invoked when a user initiates a flow via the user interface."""
+        old_config = self.hass.data[DOMAIN][CONFIG]
+        OPTIONS_USER_SCHEMA = vol.Schema(
+            {
+                vol.Required(CONF_CUSTOM_PRICE, default=old_config[CONF_USER_STEP][CONF_CUSTOM_PRICE]): cv.boolean,
+                vol.Required(CONF_CUSTOM_INJ_TARIFF, default=old_config[CONF_USER_STEP][CONF_CUSTOM_INJ_TARIFF]): cv.boolean,
+            }
+        )
+        
+        errors = {}
+        self.data = {}
+        if user_input is not None:
+            try:
+                validated_schema = OPTIONS_USER_SCHEMA(user_input)
+                
+            except Exception as e:
+                _LOGGER.error(e)
+                errors["base"] = "invalid_input"
+            
+            if not errors:
+                self.data[CONF_USER_STEP] = user_input
+                if self.data[CONF_USER_STEP][CONF_CUSTOM_PRICE]:
+                    return await self.async_step_custom_price()
+                elif self.data[CONF_USER_STEP][CONF_CUSTOM_INJ_TARIFF]:
+                    return await self.async_step_custom_inj_tariff()
+                else:
+                    return self.async_create_entry(data=self.data)
+
+        return self.async_show_form(step_id="init", data_schema=OPTIONS_USER_SCHEMA, errors=errors)
+    
+    async def async_step_custom_price(self, user_input: dict[str, Any] | None = None):
+        old_config = self.hass.data[DOMAIN][CONFIG]
+        OPTIONS_PRICE_SCHEMA = vol.Schema(
+            {
+                vol.Required(CONF_PRICE_FACTOR, default=old_config.get(CONF_CUSTOM_PRICE, {}).get(CONF_PRICE_FACTOR)): vol.Coerce(float),
+                vol.Required(CONF_FIXED_PRICE, default=old_config.get(CONF_CUSTOM_PRICE, {}).get(CONF_FIXED_PRICE)): vol.Coerce(float),
+            }
+        )
+
+        errors = {}
+        if user_input is not None:
+            try:
+                validated_schema = OPTIONS_PRICE_SCHEMA(user_input)
+            
+            except Exception as e:
+                _LOGGER.error(e)
+                errors["base"] = "invalid_input"
+
+            if not errors:
+                self.data[CONF_CUSTOM_PRICE] = user_input
+                if self.data[CONF_USER_STEP][CONF_CUSTOM_INJ_TARIFF]:
+                    return await self.async_step_custom_inj_tariff()
+                else:
+                    return self.async_create_entry(data=self.data)
+        
+        return self.async_show_form(step_id="custom_price", data_schema=OPTIONS_PRICE_SCHEMA, errors=errors)
+    
+    async def async_step_custom_inj_tariff(self, user_input: dict[str, Any] | None = None):
+        old_config = self.hass.data[DOMAIN][CONFIG]
+        OPTIONS_INJ_TARIFF_SCHEMA = vol.Schema(
+            {
+                vol.Required(CONF_INJ_TARIFF_FACTOR, default=old_config.get(CONF_CUSTOM_INJ_TARIFF, {}).get(CONF_INJ_TARIFF_FACTOR)): vol.Coerce(float),
+                vol.Required(CONF_FIXED_INJ_PRICE, default=old_config.get(CONF_CUSTOM_INJ_TARIFF, {}).get(CONF_FIXED_INJ_PRICE)): vol.Coerce(float),
+            }
+        )
+                
+        errors = {}
+        if user_input is not None:
+            try:
+                validated_schema = OPTIONS_INJ_TARIFF_SCHEMA(user_input)
+
+            except vol.Invalid as e:
+                errors["base"] = "invalid_input"
+                _LOGGER.error(e)
+            
+            if not errors:
+                self.data[CONF_CUSTOM_INJ_TARIFF] = user_input
+                return self.async_create_entry(data=self.data)
+        
+        return self.async_show_form(step_id="custom_inj_tariff", data_schema=OPTIONS_INJ_TARIFF_SCHEMA, errors=errors)

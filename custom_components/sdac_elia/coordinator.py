@@ -41,6 +41,7 @@ class SDAC_EliaCoordinator(DataUpdateCoordinator):
             config_entry=None,
             update_interval=datetime.timedelta(minutes=1)               # Interval for which to update coordinator data
         )
+
         self.custom_price_configured = custom_price_configured
         self.custom_inj_configured = custom_inj_configured
 

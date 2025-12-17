@@ -14,5 +14,21 @@
                 "title": "Custom injection tariff"
             }
         }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "description": "Do you wish to configure custom price and injection tariff formulae?",
+                "title": "Custom sensors"
+            },
+            "custom_price": {
+                "description": "Fill in custom price factor and fixed cost (A * EPEX + B) in €/kWh",
+                "title": "Custom electricity price"
+            },
+            "custom_inj_tariff": {
+                "description": "Fill in custom injection tariff factor and fixed cost (A * EPEX + B) in €/kWh",
+                "title": "Custom injection tariff"
+            }
+        }
     }
 }

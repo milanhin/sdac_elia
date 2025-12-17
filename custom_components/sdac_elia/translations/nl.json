@@ -14,5 +14,21 @@
                 "title": "Aangepast injectietarief"
             }
         }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "description": "Wilt u aangepaste prijs- en injectietarief-formules configureren?",
+                "title": "Aangepaste sensoren"
+            },
+            "custom_price": {
+                "description": "Vul de aangepaste prijsfactor en vaste kost in (A * EPEX + B) in €/kWh",
+                "title": "Aangepaste elektriciteitsprijs"
+            },
+            "custom_inj_tariff": {
+                "description": "Vul de aangepaste injectietarief-factor en vaste kost in (A * EPEX + B) in €/kWh",
+                "title": "Aangepast injectietarief"
+            }
+        }
     }
 }
