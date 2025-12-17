@@ -35,8 +35,8 @@ In the case of Ecopower's formulae (as of dec-2025):
 - electricity price: 0.00102 * EPEX_DA + 0.004 [€/kWh]
 - injection tariff: 0.00098 * EPEX_DA - 0.015 [€/kWh]
 
-This way, it's also possible to add your local network costs. These should be added to the fixed cost.
-Note: the formula is expressed in €/kWh and should be configured this way as well.
+These formulae do not include network costs (NL: nettarieven). It is possible to include those network costs by adding them to the fixed cost parameter.
+Note: the formula is expressed in €/kWh and should be configured this way as well, while the EPEX price is expressed in €/MWh.
 
 ## Graph with pricing forecast
 A graph can be shown with the [ApexChart Graph Card](https://github.com/RomRider/apexcharts-card). 
