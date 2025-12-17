@@ -31,8 +31,8 @@ The config parameters for each sensor are called:
 
 of which the factor is the multiplicator for the sdac (EPEX) price and the fixed price is the commission added to the formula, typically described as 'A * EPEX + B' where A is the factor and B is the fixed cost. An example:
 
-In the case of Ecopower's formulae:
-- elektrcity price: 0.00102 * EPEX_DA + 0.004 [€/kWh]
+In the case of Ecopower's formulae (as of dec-2025):
+- electricity price: 0.00102 * EPEX_DA + 0.004 [€/kWh]
 - injection tariff: 0.00098 * EPEX_DA - 0.015 [€/kWh]
 
 This way, it's also possible to add your local network costs. These should be added to the fixed cost.
