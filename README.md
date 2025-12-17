@@ -14,7 +14,9 @@ This component adds the following sensors to Home Assistant:
 
 ## Installation
 Installing the custom component can be done with [HACS](https://hacs.xyz) by searching for "SDAC Elia".
+
 OR
+
 It can be installed manually by downloading the [latest release](https://github.com/milanhin/sdac_elia/releases) and copying the `sdac_elia` folder into to your Home Assistant `config/custom_components` folder.
 
 ## Configuration
