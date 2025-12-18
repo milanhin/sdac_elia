@@ -7,11 +7,19 @@
             },
             "custom_price": {
                 "description": "Fill in custom price factor and fixed cost (A * EPEX + B) in €/kWh",
-                "title": "Custom electricity price"
+                "title": "Custom electricity price",
+                "data": {
+                    "price_factor": "Price factor (A)",
+                    "fixed_price": "Fixed price (B)"
+                }
             },
             "custom_inj_tariff": {
-                "description": "Fill in custom injection tariff factor and fixed cost (A * EPEX + B) in €/kWh",
-                "title": "Custom injection tariff"
+                "description": "Fill in custom injection tariff factor and fixed cost (A * EPEX - B) in €/kWh",
+                "title": "Custom injection tariff",
+                "data": {
+                    "injection_tariff_factor": "Injection tariff factor (A)",
+                    "fixed_injection_price": "Fixed injection price (B)"
+                }
             }
         }
     },
@@ -23,11 +31,19 @@
             },
             "custom_price": {
                 "description": "Fill in custom price factor and fixed cost (A * EPEX + B) in €/kWh",
-                "title": "Custom electricity price"
+                "title": "Custom electricity price",
+                "data": {
+                    "price_factor": "Price factor (A)",
+                    "fixed_price": "Fixed price (B)"
+                }
             },
             "custom_inj_tariff": {
-                "description": "Fill in custom injection tariff factor and fixed cost (A * EPEX + B) in €/kWh",
-                "title": "Custom injection tariff"
+                "description": "Fill in custom injection tariff factor and fixed cost (A * EPEX - B) in €/kWh",
+                "title": "Custom injection tariff",
+                "data": {
+                    "injection_tariff_factor": "Injection tariff factor (A)",
+                    "fixed_injection_price": "Fixed injection price (B)"
+                }
             }
         }
     }

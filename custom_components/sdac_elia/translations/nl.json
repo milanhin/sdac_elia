@@ -7,11 +7,19 @@
             },
             "custom_price": {
                 "description": "Vul de aangepaste prijsfactor en vaste kost in (A * EPEX + B) in €/kWh",
-                "title": "Aangepaste elektriciteitsprijs"
+                "title": "Aangepaste elektriciteitsprijs",
+                "data": {
+                    "price_factor": "Prijsfactor (A)",
+                    "fixed_price": "Vaste kost price (B)"
+                }
             },
             "custom_inj_tariff": {
-                "description": "Vul de aangepaste injectietarief-factor en vaste kost in (A * EPEX + B) in €/kWh",
-                "title": "Aangepast injectietarief"
+                "description": "Vul de aangepaste injectietarief-factor en vaste kost in (A * EPEX - B) in €/kWh",
+                "title": "Aangepast injectietarief",
+                "data": {
+                    "injection_tariff_factor": "Injection tariff factor (A)",
+                    "fixed_injection_price": "Fixed injection price (B)"
+                }
             }
         }
     },
@@ -23,11 +31,19 @@
             },
             "custom_price": {
                 "description": "Vul de aangepaste prijsfactor en vaste kost in (A * EPEX + B) in €/kWh",
-                "title": "Aangepaste elektriciteitsprijs"
+                "title": "Aangepaste elektriciteitsprijs",
+                "data": {
+                    "price_factor": "Prijsfactor (A)",
+                    "fixed_price": "Vaste kost price (B)"
+                }
             },
             "custom_inj_tariff": {
-                "description": "Vul de aangepaste injectietarief-factor en vaste kost in (A * EPEX + B) in €/kWh",
-                "title": "Aangepast injectietarief"
+                "description": "Vul de aangepaste injectietarief-factor en vaste kost in (A * EPEX - B) in €/kWh",
+                "title": "Aangepast injectietarief",
+                "data": {
+                    "injection_tariff_factor": "Injection tariff factor (A)",
+                    "fixed_injection_price": "Fixed injection price (B)"
+                }
             }
         }
     }
